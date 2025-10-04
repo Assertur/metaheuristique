@@ -8,17 +8,22 @@ using LinearAlgebra
 include("loadSPP.jl")
 include("setSPP.jl")
 include("getfname.jl")
+include("construction.jl")
 
 # =========================================================================== #
 
 # Loading a SPP instance
 println("\nLoading...")
-fname = "/Data/didactic.dat"
+fname = "./Data/didactic.dat"
 C, A = loadSPP(fname)
 @show C
 @show A
 
-
+#Greedy construction heuristic
+println("\nConstructing...")
+choices, z = construction(C, A) 
+println("z = ", z)
+print("x = "); println(choices)
 
 # Solving a SPP instance with GLPK
 println("\nSolving...")
