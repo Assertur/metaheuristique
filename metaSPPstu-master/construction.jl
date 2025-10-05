@@ -9,7 +9,7 @@ function maxUtility(C, A, V)
     for i in 1:size(C,1)
         n = 0
         for j in 1:size(A,1)
-            if i ∉ V && A[j,i] == 1
+            if !V[i] && A[j,i] == 1
                 n += 1
             end
         end
@@ -21,7 +21,6 @@ function maxUtility(C, A, V)
             end
         end
     end
-    println("iMax = ", iMax)
     return iMax
 end
         
@@ -33,16 +32,15 @@ function construction(C, A)
     # Outputs: choices : vector of choices
     #          z : cost of the solution
     choices = zeros(Int,1,size(C,1))
-    v = []
-    while size(v,1) < size(C,1)
-        println("v = ", v)  
+    v = falses(size(C,1)) 
+    while false in v
         mU = maxUtility(C, A, v)
-        push!(v, mU)
+        v[mU] = true
         for i in 1:size(A,1)
             if A[i,mU] == 1
                 for j in eachindex(A[i,:])
-                    if j ∉ v && A[i,j] == 1
-                        push!(v, j)
+                    if !v[j] && A[i,j] == 1
+                        v[j] = true
                     end
                 end
             end
