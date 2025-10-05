@@ -21,7 +21,6 @@ function maxUtility(C, A, V)
             end
         end
     end
-    println("iMax = ", iMax)
     return iMax
 end
         
@@ -35,7 +34,6 @@ function construction(C, A)
     choices = zeros(Int,1,size(C,1))
     v = []
     while size(v,1) < size(C,1)
-        println("v = ", v)  
         mU = maxUtility(C, A, v)
         push!(v, mU)
         for i in 1:size(A,1)
