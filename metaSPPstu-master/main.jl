@@ -10,6 +10,7 @@ include("setSPP.jl")
 include("getfname.jl")
 include("construction.jl")
 include("simpleDescent.jl")
+using .SimpleDescent
 
 # =========================================================================== #
 
@@ -28,9 +29,39 @@ print("x = "); println(choices)
 
 #Simple descent heuristic
 println("\nImproving...")
-choices, z = exchange11(C, A, choices, z)
-println("z = ", z)
-print("x = "); println(choices)
+for i in 1:20
+    new_choices, new_z = kpExchange(C, A, choices, z, 2, 2)
+    if new_z > z
+        global choices, z
+        choices = new_choices
+        z = new_z
+        println("z = ", z)
+        print("x = "); println(choices)
+        println(i)
+    end
+end
+for i in 1:15
+    new_choices, new_z = kpExchange(C, A, choices, z, 1, 1)
+    if new_z > z
+        global choices, z
+        choices = new_choices
+        z = new_z
+        println("z = ", z)
+        print("x = "); println(choices)
+        println(i)
+    end
+end
+for i in 1:10
+    new_choices, new_z = kpExchange(C, A, choices, z, 0, 1)
+    if new_z > z
+        global choices, z
+        choices = new_choices
+        z = new_z
+        println("z = ", z)
+        print("x = "); println(choices)
+        println(i)
+    end
+end
 
 # Solving a SPP instance with GLPK
 println("\nSolving...")

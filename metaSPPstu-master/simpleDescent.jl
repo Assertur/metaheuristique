@@ -1,3 +1,10 @@
+module SimpleDescent
+# Using the following packages
+using Combinatorics
+
+export kpExchange
+end
+
 function feasibleExchange(A, choices)
     # Function to check if a solution is feasible
     # Inputs: A : matrix of constraints
@@ -7,6 +14,29 @@ function feasibleExchange(A, choices)
     temp = A * c
 
     return all(temp .<= 1)
+end
+
+function sufisanteX(choices, k, remove)
+    # Function to check if there are at least k variables chosen in the solution
+    # Inputs: choices : vector of choices
+    #         k : number of variables to remove or to add
+    #         remove : boolean indicating if we are removing or adding variables
+    # Output: boolean indicating if there are at least k variables chosen
+    n = 0
+    if remove
+        for i in eachindex(choices)
+            if choices[i] == 1
+                n += 1
+            end
+        end
+        else
+            for i in eachindex(choices)
+                if choices[i] == 0
+                    n += 1
+                end
+            end
+        end
+    return n >= k
 end
 
 function exchange11(C, A, choices, z)
@@ -40,6 +70,56 @@ function exchange11(C, A, choices, z)
                 j += 1
             end
             i += 1
+        end
+    end
+    return choices, z
+end
+
+function kpExchange(C, A, choices, z, k, p)
+    # Function to improve a solution to the SPP using a k-p exchange heuristic
+    # Inputs: C : vector of costs
+    #         A : matrix of constraints
+    #         choices : vector of choices
+    #         z : cost of the solution
+    #         k : number of variables to remove
+    #         p : number of variables to add
+    # Outputs: choices : vector of choices
+    #          z : cost of the solution
+    if !sufisanteX(choices, k, true) || !sufisanteX(choices, p, false)
+        error("Not enough variables to remove or to add")
+    end
+    kChoices = Int[]
+    pChoices = Int[]
+    for iC in eachindex(choices)
+        if choices[iC] == 1
+            push!(kChoices, iC)
+        else
+            push!(pChoices, iC)
+        end
+    end
+    for kTab in combinations(kChoices, k)
+        for pTab in combinations(pChoices, p)
+            new_z = z
+            for iT in eachindex(kTab)
+                new_z -= C[kTab[iT]]
+            end
+            for jT in eachindex(pTab)
+                new_z += C[pTab[jT]]
+            end
+            if new_z > z
+                new_choices = copy(choices)
+                for i in eachindex(kTab)
+                    new_choices[kTab[i]] = 0
+                end
+                for j in eachindex(pTab)
+                    new_choices[pTab[j]] = 1
+                end
+                if feasibleExchange(A, new_choices)
+                    println(new_choices)
+                    choices , z = new_choices, new_z
+                    return choices, z
+                end
+            end
         end
     end
     return choices, z
