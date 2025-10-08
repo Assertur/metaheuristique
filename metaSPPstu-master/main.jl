@@ -16,52 +16,24 @@ using .SimpleDescent
 
 # Loading a SPP instance
 println("\nLoading...")
-fname = "./Data/pb_100rnd0100.dat"
+fname = "./Data/pb_200rnd0100.dat"
 C, A = loadSPP(fname)
-@show C
-@show A
+#@show C
+#@show A
 
+timer_start = time()
 #Greedy construction heuristic
 println("\nConstructing...")
-choices, z = construction(C, A) 
+choices, z = construction(C, A, 0.75) 
 println("z = ", z)
-print("x = "); println(choices)
+#print("x = "); println(choices)
+println("Time taken for construction: ", time() - timer_start, " seconds")
 
+timer_start = time()
 #Simple descent heuristic
 println("\nImproving...")
-for i in 1:20
-    new_choices, new_z = kpExchange(C, A, choices, z, 2, 2)
-    if new_z > z
-        global choices, z
-        choices = new_choices
-        z = new_z
-        println("z = ", z)
-        print("x = "); println(choices)
-        println(i)
-    end
-end
-for i in 1:15
-    new_choices, new_z = kpExchange(C, A, choices, z, 1, 1)
-    if new_z > z
-        global choices, z
-        choices = new_choices
-        z = new_z
-        println("z = ", z)
-        print("x = "); println(choices)
-        println(i)
-    end
-end
-for i in 1:10
-    new_choices, new_z = kpExchange(C, A, choices, z, 0, 1)
-    if new_z > z
-        global choices, z
-        choices = new_choices
-        z = new_z
-        println("z = ", z)
-        print("x = "); println(choices)
-        println(i)
-    end
-end
+choices, z = SimpleDescent.updateZ(C, A, choices, z)
+println("Time taken for construction: ", time() - timer_start, " seconds")
 
 # Solving a SPP instance with GLPK
 println("\nSolving...")

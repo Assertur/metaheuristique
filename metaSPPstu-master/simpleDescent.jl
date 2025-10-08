@@ -2,8 +2,8 @@ module SimpleDescent
 # Using the following packages
 using Combinatorics
 
-export kpExchange
-end
+export updateZ
+
 
 function feasibleExchange(A, choices)
     # Function to check if a solution is feasible
@@ -62,7 +62,6 @@ function exchange11(C, A, choices, z)
                     new_choices[i] = 0
                     new_choices[j] = 1
                     if feasibleExchange(A, new_choices)
-                        println(new_choices)
                         choices , z = new_choices, new_z
                         improved = true
                     end
@@ -115,7 +114,6 @@ function kpExchange(C, A, choices, z, k, p)
                     new_choices[pTab[j]] = 1
                 end
                 if feasibleExchange(A, new_choices)
-                    println(new_choices)
                     choices , z = new_choices, new_z
                     return choices, z
                 end
@@ -123,4 +121,49 @@ function kpExchange(C, A, choices, z, k, p)
         end
     end
     return choices, z
+end
+
+function runKPExchange(C, A, choices, z, k, p, max_iteration)
+    # Function to improve a solution to the SPP using a k-p exchange heuristic
+    # Inputs: C : vector of costs
+    #         A : matrix of constraints
+    #         choices : vector of choices
+    #         z : cost of the solution
+    #         k : number of variables to remove
+    #         p : number of variables to add
+    #         max_iteration : maximum number of iterations
+    # Outputs: choices : vector of choices
+    #          z : cost of the solution
+    i = 1
+    while i <= max_iteration
+        new_choices, new_z = kpExchange(C, A, choices, z, k, p)
+        if new_z > z
+            choices = new_choices
+            z = new_z
+            println("z = ", z)
+        else
+            println("fin du kpExchange pour i = ", i, " k = ", k, " p = ", p)
+            if choices == new_choices
+                i = max_iteration + 1
+            end
+        end
+        i += 1
+    end
+    return choices, z
+end
+
+
+function updateZ(C, A, choices, z)
+    # Function to improve a solution to the SPP using a simple descent heuristic
+    # Inputs: C : vector of costs
+    #         A : matrix of constraints
+    #         choices : vector of choices
+    #         z : cost of the solution
+    # Outputs: choices : vector of choices
+    #          z : cost of the solution
+    choices, z = runKPExchange(C, A, choices, z, 2, 2, 20)
+    choices, z = runKPExchange(C, A, choices, z, 1, 1, 15)
+    choices, z = runKPExchange(C, A, choices, z, 0, 1, 10)
+    return choices, z
+end
 end
