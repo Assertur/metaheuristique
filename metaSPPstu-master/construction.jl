@@ -29,13 +29,13 @@ function maxUtility(C, A, vConstraint, vVariable, alpha)
         end
     end
     seuil = max*alpha
-    possibilities = []
+    rcl = []
     for i in 1:size(iValue,1)
         if iValue[i]*alpha >= seuil
-            possibilities = push!(possibilities,i)
+            rcl = push!(rcl,i)
         end
     end
-    iMax = possibilities[rand(1:length(possibilities))]
+    iMax = rcl[rand(1:length(rcl))]
     return iMax
 end
         

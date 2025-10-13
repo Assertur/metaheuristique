@@ -16,7 +16,7 @@ using .SimpleDescent
 
 # Loading a SPP instance
 println("\nLoading...")
-fname = "./Data/pb_200rnd0100.dat"
+fname = "./Data/pb_500rnd0100.dat"
 C, A = loadSPP(fname)
 #@show C
 #@show A
@@ -33,19 +33,20 @@ timer_start = time()
 #Simple descent heuristic
 println("\nImproving...")
 choices, z = SimpleDescent.updateZ(C, A, choices, z)
+println("z = ", z)
 println("Time taken for construction: ", time() - timer_start, " seconds")
 
 # Solving a SPP instance with GLPK
 println("\nSolving...")
-solverSelected = GLPK.Optimizer
-spp = setSPP(C, A)
+#solverSelected = GLPK.Optimizer
+#spp = setSPP(C, A)
 
-set_optimizer(spp, solverSelected)
-optimize!(spp)
+#set_optimizer(spp, solverSelected)
+#optimize!(spp)
 
 # Displaying the results
-println("z = ", objective_value(spp))
-print("x = "); println(value.(spp[:x]))
+#println("z = ", objective_value(spp))
+#print("x = "); println(value.(spp[:x]))
 
 # =========================================================================== #
 

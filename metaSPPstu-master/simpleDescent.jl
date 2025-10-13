@@ -5,15 +5,32 @@ using Combinatorics
 export updateZ
 
 
-function feasibleExchange(A, choices)
+function feasibleExchange(A, mp, kTab, pTab)
     # Function to check if a solution is feasible
     # Inputs: A : matrix of constraints
     #         choices : vector of choices
     # Output: feasible : boolean indicating if the solution is feasible
-    c = reshape(choices, :, 1)
-    temp = A * c
 
-    return all(temp .<= 1)
+    temp = copy(mp)
+
+    for k in eachindex(kTab)
+        for c in 1:size(A,1)
+            temp[c] -= A[c, kTab[k]]
+        end
+    end 
+    for p in eachindex(pTab)
+        for c in 1:size(A,1)
+            temp[c] += A[c, pTab[p]]
+        end
+    end
+
+    feasible = all(temp .<= 1)
+
+    if feasible
+        mp = temp
+    end
+
+    return feasible,mp
 end
 
 function sufisanteX(choices, k, remove)
@@ -84,38 +101,40 @@ function kpExchange(C, A, choices, z, k, p)
     #         p : number of variables to add
     # Outputs: choices : vector of choices
     #          z : cost of the solution
-    if !sufisanteX(choices, k, true) || !sufisanteX(choices, p, false)
-        error("Not enough variables to remove or to add")
-    end
-    kChoices = Int[]
-    pChoices = Int[]
-    for iC in eachindex(choices)
-        if choices[iC] == 1
-            push!(kChoices, iC)
-        else
-            push!(pChoices, iC)
+    mp = A * reshape(choices, :, 1) # Matricial product to check if the solution is feasible
+    mp = vec(mp) 
+    if sufisanteX(choices, k, true) && sufisanteX(choices, p, false)
+        kChoices = Int[]
+        pChoices = Int[]
+        for iC in eachindex(choices)
+            if choices[iC] == 1
+                push!(kChoices, iC)
+            else
+                push!(pChoices, iC)
+            end
         end
-    end
-    for kTab in combinations(kChoices, k)
-        for pTab in combinations(pChoices, p)
-            new_z = z
-            for iT in eachindex(kTab)
-                new_z -= C[kTab[iT]]
-            end
-            for jT in eachindex(pTab)
-                new_z += C[pTab[jT]]
-            end
-            if new_z > z
-                new_choices = copy(choices)
-                for i in eachindex(kTab)
-                    new_choices[kTab[i]] = 0
+        for kTab in combinations(kChoices, k)
+            for pTab in combinations(pChoices, p)
+                new_z = z
+                for iT in eachindex(kTab)
+                    new_z -= C[kTab[iT]]
                 end
-                for j in eachindex(pTab)
-                    new_choices[pTab[j]] = 1
+                for jT in eachindex(pTab)
+                    new_z += C[pTab[jT]]
                 end
-                if feasibleExchange(A, new_choices)
-                    choices , z = new_choices, new_z
-                    return choices, z
+                if new_z > z
+                    feasible, new_mp = feasibleExchange(A, mp, kTab, pTab)
+                    if feasible
+                        new_choices = copy(choices)
+                        mp = new_mp
+                        for i in eachindex(kTab)
+                            new_choices[kTab[i]] = 0
+                        end
+                        for j in eachindex(pTab)
+                            new_choices[pTab[j]] = 1
+                        end
+                        return new_choices, new_z
+                    end
                 end
             end
         end
@@ -140,9 +159,8 @@ function runKPExchange(C, A, choices, z, k, p, max_iteration)
         if new_z > z
             choices = new_choices
             z = new_z
-            println("z = ", z)
         else
-            println("fin du kpExchange pour i = ", i, " k = ", k, " p = ", p)
+            println("fin du kpExchange pour i = ", i, " k = ", k, " p = ", p, " z = ", z)
             if choices == new_choices
                 i = max_iteration + 1
             end
@@ -161,8 +179,8 @@ function updateZ(C, A, choices, z)
     #         z : cost of the solution
     # Outputs: choices : vector of choices
     #          z : cost of the solution
-    choices, z = runKPExchange(C, A, choices, z, 2, 2, 20)
-    choices, z = runKPExchange(C, A, choices, z, 1, 1, 15)
+    choices, z = runKPExchange(C, A, choices, z, 2, 2, 10)
+    choices, z = runKPExchange(C, A, choices, z, 1, 1, 10)
     choices, z = runKPExchange(C, A, choices, z, 0, 1, 10)
     return choices, z
 end
