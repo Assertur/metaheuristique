@@ -10,31 +10,25 @@ include("setSPP.jl")
 include("getfname.jl")
 include("construction.jl")
 include("simpleDescent.jl")
+include("simpleGrasp.jl")
+include("reactiveGrasp.jl")
 using .SimpleDescent
 
 # =========================================================================== #
 
 # Loading a SPP instance
 println("\nLoading...")
-fname = "./Data/pb_500rnd0100.dat"
+fname = "./Data/pb_200rnd0100.dat"
 C, A = loadSPP(fname)
 #@show C
 #@show A
 
-timer_start = time()
-#Greedy construction heuristic
-println("\nConstructing...")
-choices, z = construction(C, A, 0.75) 
-println("z = ", z)
-#print("x = "); println(choices)
-println("Time taken for construction: ", time() - timer_start, " seconds")
+# Solving a SPP instance with a simple GRASP
+simpleGrasp(A,C,0.75)
 
-timer_start = time()
-#Simple descent heuristic
-println("\nImproving...")
-choices, z = SimpleDescent.updateZ(C, A, choices, z)
-println("z = ", z)
-println("Time taken for construction: ", time() - timer_start, " seconds")
+# Solving a SPP instance with a reactive GRASP
+reactiveGrasp(20,100,[0.1,0.25,0.5,0.75,0.9],C,A)
+
 
 # Solving a SPP instance with GLPK
 println("\nSolving...")

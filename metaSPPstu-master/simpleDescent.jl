@@ -56,40 +56,6 @@ function sufisanteX(choices, k, remove)
     return n >= k
 end
 
-function exchange11(C, A, choices, z)
-    #Horrible running time (O(n^3))
-
-    # Function to improve a solution to the SPP using a simple descent heuristic
-    # Inputs: C : vector of costs
-    #         A : matrix of constraints
-    #         choices : vector of choices
-    #         z : cost of the solution
-    # Outputs: choices : vector of choices
-    #          z : cost of the solution
-    improved = true
-    while improved
-        improved = false
-        i = 1
-        while i < length(choices) && !improved
-            j = 1
-            while j < length(choices) && !improved
-                new_z = z - C[i] + C[j]
-                if choices[i] == 1 && choices[j] == 0 && new_z > z
-                    new_choices = copy(choices)
-                    new_choices[i] = 0
-                    new_choices[j] = 1
-                    if feasibleExchange(A, new_choices)
-                        choices , z = new_choices, new_z
-                        improved = true
-                    end
-                end
-                j += 1
-            end
-            i += 1
-        end
-    end
-    return choices, z
-end
 
 function kpExchange(C, A, choices, z, k, p)
     # Function to improve a solution to the SPP using a k-p exchange heuristic
@@ -160,7 +126,7 @@ function runKPExchange(C, A, choices, z, k, p, max_iteration)
             choices = new_choices
             z = new_z
         else
-            println("fin du kpExchange pour i = ", i, " k = ", k, " p = ", p, " z = ", z)
+           # println("fin du kpExchange pour i = ", i, " k = ", k, " p = ", p, " z = ", z)
             if choices == new_choices
                 i = max_iteration + 1
             end
@@ -179,7 +145,7 @@ function updateZ(C, A, choices, z)
     #         z : cost of the solution
     # Outputs: choices : vector of choices
     #          z : cost of the solution
-    choices, z = runKPExchange(C, A, choices, z, 2, 2, 10)
+    choices, z = runKPExchange(C, A, choices, z, 1, 2, 10)
     choices, z = runKPExchange(C, A, choices, z, 1, 1, 10)
     choices, z = runKPExchange(C, A, choices, z, 0, 1, 10)
     return choices, z

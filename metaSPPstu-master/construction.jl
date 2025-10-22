@@ -15,8 +15,8 @@ function maxUtility(C, A, vConstraint, vVariable, alpha)
             end
         end  
     end
-    iMax = 1
     max = 0
+    min = Inf
     for i in 1:size(iValue,1)
         n = iValue[i]
         if n>0
@@ -24,14 +24,16 @@ function maxUtility(C, A, vConstraint, vVariable, alpha)
             iValue[i] = u
             if u > max 
                 max = u
-                iMax = i
+            end
+            if u < min
+                min = u
             end
         end
     end
-    seuil = max*alpha
+    seuil = min + (alpha * (max - min))
     rcl = []
     for i in 1:size(iValue,1)
-        if iValue[i]*alpha >= seuil
+        if iValue[i] >= seuil
             rcl = push!(rcl,i)
         end
     end
