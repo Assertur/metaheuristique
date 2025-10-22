@@ -2,36 +2,9 @@ module SimpleDescent
 # Using the following packages
 using Combinatorics
 
+include("feasible.jl")
+
 export updateZ
-
-
-function feasibleExchange(A, mp, kTab, pTab)
-    # Function to check if a solution is feasible
-    # Inputs: A : matrix of constraints
-    #         choices : vector of choices
-    # Output: feasible : boolean indicating if the solution is feasible
-
-    temp = copy(mp)
-
-    for k in eachindex(kTab)
-        for c in 1:size(A,1)
-            temp[c] -= A[c, kTab[k]]
-        end
-    end 
-    for p in eachindex(pTab)
-        for c in 1:size(A,1)
-            temp[c] += A[c, pTab[p]]
-        end
-    end
-
-    feasible = all(temp .<= 1)
-
-    if feasible
-        mp = temp
-    end
-
-    return feasible,mp
-end
 
 function sufisanteX(choices, k, remove)
     # Function to check if there are at least k variables chosen in the solution
@@ -89,8 +62,8 @@ function kpExchange(C, A, choices, z, k, p)
                     new_z += C[pTab[jT]]
                 end
                 if new_z > z
-                    feasible, new_mp = feasibleExchange(A, mp, kTab, pTab)
-                    if feasible
+                    isFeasible, new_mp = feasible(A, mp, kTab, pTab)
+                    if isFeasible
                         new_choices = copy(choices)
                         mp = new_mp
                         for i in eachindex(kTab)
@@ -145,7 +118,7 @@ function updateZ(C, A, choices, z)
     #         z : cost of the solution
     # Outputs: choices : vector of choices
     #          z : cost of the solution
-    choices, z = runKPExchange(C, A, choices, z, 1, 2, 10)
+    choices, z = runKPExchange(C, A, choices, z, 2, 1, 10)
     choices, z = runKPExchange(C, A, choices, z, 1, 1, 10)
     choices, z = runKPExchange(C, A, choices, z, 0, 1, 10)
     return choices, z

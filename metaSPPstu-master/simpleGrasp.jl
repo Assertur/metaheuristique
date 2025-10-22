@@ -13,4 +13,5 @@ function simpleGrasp(A,C,alpha)
     choices, z = SimpleDescent.updateZ(C, A, choices, z)
     println("z = ", z)
     println("Time taken for construction: ", time() - timer_start, " seconds")
+    return z, choices
 end

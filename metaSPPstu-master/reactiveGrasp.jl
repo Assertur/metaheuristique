@@ -6,6 +6,7 @@ function reactiveGrasp(itp, itg, listK, C, A)
     itk = zeros(Integer, size(listK,1))
     zWorst = Inf
     zBest = 0
+    cBest = []
     n = itg / itp
     for i in 1:n 
         for j in 1:itp
@@ -26,6 +27,7 @@ function reactiveGrasp(itp, itg, listK, C, A)
             end
             if z > zBest
                 zBest = z
+                cBest = copy(choices)
             end
         end
         qi = 0
@@ -36,6 +38,7 @@ function reactiveGrasp(itp, itg, listK, C, A)
         for i in 1:size(listK,1)
             pK[i] = qk[i] / qi
         end
-        println("pk", pK, " -- ", "zBest = ", zBest, " -- ", "zWorst = ", zWorst, " -- ", "zAvgK = ", zAvgK, "itk = ", itk)
+        println("zBest = ", zBest, " -- ", "zWorst = ", zWorst, " -- ", "zAvgK = ", zAvgK)
     end
+    return zBest, cBest
 end
