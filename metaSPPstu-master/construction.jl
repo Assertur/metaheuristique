@@ -1,46 +1,65 @@
-function maxUtility(C, A, V)
+function maxUtility(C, A, vConstraint, vVariable, alpha)
     # Function to find the index of the column with the maximum utility
     # Inputs: C : vector of costs   
     #         A : matrix of constraints
     #         V : vector of columns that can't be chosen anymore
+    #         alpha : parameter to adjust the greediness of the heuristic
     # Output: iMax : index of the column with the maximum utility
-    iMax = 1
-    max = 0
-    for i in 1:size(C,1)
-        n = 0
-        for j in 1:size(A,1)
-            if !V[i] && A[j,i] == 1
-                n += 1
+    iValue = zeros(Float64,size(C,1))
+    for i in 1:size(A,1)
+        if !vConstraint[i]
+            for j in 1:size(C,1)
+                if !vVariable[j] && A[i,j] == 1
+                    iValue[j] += 1
+                end
             end
-        end
+        end  
+    end
+    max = 0
+    min = Inf
+    for i in 1:size(iValue,1)
+        n = iValue[i]
         if n>0
             u = C[i]/n
+            iValue[i] = u
             if u > max 
                 max = u
-                iMax = i
+            end
+            if u < min
+                min = u
             end
         end
     end
+    seuil = min + (alpha * (max - min))
+    rcl = []
+    for i in 1:size(iValue,1)
+        if iValue[i] >= seuil
+            rcl = push!(rcl,i)
+        end
+    end
+    iMax = rcl[rand(1:length(rcl))]
     return iMax
 end
         
 
-function construction(C, A)
+function construction(C, A, alpha)
     # Function to construct a solution to the SPP using a greedy heuristic
     # Inputs: C : vector of costs
     #         A : matrix of constraints
     # Outputs: choices : vector of choices
     #          z : cost of the solution
     choices = zeros(Int,1,size(C,1))
-    v = falses(size(C,1)) 
-    while false in v
-        mU = maxUtility(C, A, v)
-        v[mU] = true
+    vConstraint = falses(size(A,1))
+    vVariable = falses(size(C,1))
+    while false in vVariable
+        mU = maxUtility(C, A, vConstraint, vVariable, alpha)
+        vConstraint[mU] = true
         for i in 1:size(A,1)
             if A[i,mU] == 1
-                for j in eachindex(A[i,:])
-                    if !v[j] && A[i,j] == 1
-                        v[j] = true
+                vConstraint[i] = true
+                for j in 1:size(C,1)
+                    if A[i,j] == 1
+                        vVariable[j] = true
                     end
                 end
             end

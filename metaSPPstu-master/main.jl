@@ -9,33 +9,38 @@ include("loadSPP.jl")
 include("setSPP.jl")
 include("getfname.jl")
 include("construction.jl")
+include("simpleDescent.jl")
+include("simpleGrasp.jl")
+include("reactiveGrasp.jl")
+using .SimpleDescent
 
 # =========================================================================== #
 
 # Loading a SPP instance
 println("\nLoading...")
-fname = "./Data/didactic.dat"
+fname = "./Data/pb_200rnd0100.dat"
 C, A = loadSPP(fname)
-@show C
-@show A
+#@show C
+#@show A
 
-#Greedy construction heuristic
-println("\nConstructing...")
-choices, z = construction(C, A) 
-println("z = ", z)
-print("x = "); println(choices)
+# Solving a SPP instance with a simple GRASP
+simpleGrasp(A,C,0.75)
+
+# Solving a SPP instance with a reactive GRASP
+reactiveGrasp(20,100,[0.1,0.25,0.5,0.75,0.9],C,A)
+
 
 # Solving a SPP instance with GLPK
 println("\nSolving...")
-solverSelected = GLPK.Optimizer
-spp = setSPP(C, A)
+#solverSelected = GLPK.Optimizer
+#spp = setSPP(C, A)
 
-set_optimizer(spp, solverSelected)
-optimize!(spp)
+#set_optimizer(spp, solverSelected)
+#optimize!(spp)
 
 # Displaying the results
-println("z = ", objective_value(spp))
-print("x = "); println(value.(spp[:x]))
+#println("z = ", objective_value(spp))
+#print("x = "); println(value.(spp[:x]))
 
 # =========================================================================== #
 
