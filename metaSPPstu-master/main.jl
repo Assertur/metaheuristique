@@ -14,6 +14,7 @@ include("simpleDescent.jl")
 include("simpleGrasp.jl")
 include("reactiveGrasp.jl")
 include("pathRelinking.jl")
+include("ACO.jl")
 using .SimpleDescent
 
 # =========================================================================== #
@@ -31,9 +32,10 @@ z1, s1 = simpleGrasp(A,C,0.75)
 # Solving a SPP instance with a reactive GRASP
 z2, s2 = reactiveGrasp(5,100,[0.1,0.25,0.5,0.75,0.9],C,A)
 
-println(pathRelinking(A, C, s1, z1, s2, z2))
+#println(pathRelinking(A, C, s1, z1, s2, z2))
 
-
+#Solving with ACO
+println(ACO(1000, A, C, 50, 50))
 
 
 # Solving a SPP instance with GLPK
