@@ -1,17 +1,23 @@
-function simpleGrasp(A,C,alpha)
-    timer_start = time()
-    #Greedy construction heuristic
-    println("\nConstructing...")
-    choices, z = construction(C, A, alpha) 
-    println("z = ", z)
-    #print("x = "); println(choices)
-    println("Time taken for construction: ", time() - timer_start, " seconds")
-
-    timer_start = time()
-    #Simple descent heuristic
-    println("\nImproving...")
-    choices, z = SimpleDescent.updateZ(C, A, choices, z)
-    println("z = ", z)
-    println("Time taken for construction: ", time() - timer_start, " seconds")
-    return z, choices
+function simpleGrasp(A,C,alpha,nbIter)
+    zconstruction = zeros(Int64,nbIter)
+    zamelioration = zeros(Int64,nbIter)
+    zbest = zeros(Int64,nbIter)
+    zbetter=0
+    best_choices = []
+    iter = 1
+    while iter <= nbIter 
+        #Greedy construction heuristic
+        choices, z = construction(C, A, alpha)
+        zconstruction[iter] = z
+        #Simple descent heuristic
+        choices, z = SimpleDescent.updateZ(C, A, choices, z)
+        zamelioration[iter] = z
+        if z > zbetter
+            zbetter = z
+            best_choices = choices
+        end
+        zbest[iter] = zbetter
+        iter += 1
+    end
+    return zconstruction, zamelioration, zbest, zbetter, best_choices
 end

@@ -1,0 +1,51 @@
+using PyPlot
+
+function plotRunGrasp(iname, zinit, zls, zbest)
+
+    plot_dir = "plots"
+    isdir(plot_dir) || mkdir(plot_dir)
+
+    last_valid = findlast(!=(0), zbest)
+    zinit = zinit[1:last_valid]
+    zls   = zls[1:last_valid]
+    zbest = zbest[1:last_valid]
+
+    figure("run $iname",figsize=(6,6)) # Create a new figure
+    title("GRASP-SPP | \$z_{Init}\$  \$z_{LS}\$  \$z_{Best}\$ | " * iname)
+    xlabel("Itérations")
+    ylabel("valeurs de z(x)")
+    ylim(0, maximum(zbest)+2)
+
+    nPoint = length(zinit)
+    x=collect(1:nPoint)
+    xticks([1,convert(Int64,ceil(nPoint/4)),convert(Int64,ceil(nPoint/2)), convert(Int64,ceil(nPoint/4*3)),nPoint])
+    plot(x,zbest, linewidth=2.0, color="green", label="meilleures solutions")
+    plot(x,zls,ls="",marker="^",ms=2,color="green",label="toutes solutions améliorées")
+    plot(x,zinit,ls="",marker=".",ms=2,color="red",label="toutes solutions construites")
+    vlines(x, zinit, zls, linewidth=0.5)
+    legend(loc=4, fontsize ="small")
+
+    filename = joinpath(plot_dir, "run_$iname.png")
+    savefig(filename)
+    println("Plot sauvegardé dans $filename")
+end
+
+function plotCPUt(allfinstance, tmoy)
+
+    plot_dir = "plots"
+    isdir(plot_dir) || mkdir(plot_dir)
+
+    figure("bilan CPUt tous runs",figsize=(6,10)) # Create a new figure
+    title("GRASP-SPP | tMoy")
+    ylabel("CPUt moyen (s)")
+
+    xticks(collect(1:length(allfinstance)), allfinstance, rotation=60, ha="right")
+    margins(0.15)
+    subplots_adjust(bottom=0.15,left=0.21)
+    plot(collect(1:length(allfinstance)),tmoy,linestyle="--", lw=0.5, marker="o", ms=4, color="blue", label="tMoy")
+    legend(loc=4, fontsize ="small")
+
+    filename = joinpath(plot_dir, "cput_grasp.png")
+    savefig(filename)
+    println("Plot sauvegardé dans $filename")
+end

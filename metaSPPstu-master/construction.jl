@@ -30,7 +30,11 @@ function maxUtility(C, A, vConstraint, vVariable, alpha)
             end
         end
     end
-    seuil = min + (alpha * (max - min))
+    if alpha == 1.0
+        seuil = max
+    else
+        seuil = min + (alpha * (max - min))
+    end
     rcl = []
     for i in 1:size(iValue,1)
         if iValue[i] >= seuil
