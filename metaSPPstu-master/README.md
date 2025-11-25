@@ -48,11 +48,15 @@ julia main.jl --method grasp --instance didactic.dat --plot
 main.jl [--method METHOD] [-i INSTANCE] [--plot] [-h]
 
 optional arguments:
+
   --method METHOD       Method to run: greedy / grasp / reactive / pr
                         / aco / all (default: "all")
+                        
   -i, --instance INSTANCE
                         Filename in ./Data/ (default: "all")
+                        
   --plot                Generate plots
+  
   -h, --help            show this help message and exit
 
 ------
