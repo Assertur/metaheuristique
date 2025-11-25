@@ -107,7 +107,7 @@ end
 
 
 
-function ACO(A, C, maxAnt = 15, maxIter = 100, iterOnExploit = 3,rhoE = 0.05, rhoD = 0.1, iterStagnant = 20)
+function ACO(A, C, maxAnt = 10, maxIter = 50, iterOnExploit = 3 ,rhoE = 0.01, rhoD = 0.1, iterStagnant = 5)
     m = length(C)
     n = maxAnt
 
@@ -138,6 +138,7 @@ function ACO(A, C, maxAnt = 15, maxIter = 100, iterOnExploit = 3,rhoE = 0.05, rh
             push!(zconstruction, sol.z)
 
             sol.value, sol.z = SimpleDescent.runKPExchange(C, A, sol.value, sol.z,1,1,10)
+            sol.value, sol.z = SimpleDescent.runKPExchange(C, A, sol.value, sol.z,0,1,10)
             push!(zamelioration, sol.z)
 
             if sol.z > bestZIter

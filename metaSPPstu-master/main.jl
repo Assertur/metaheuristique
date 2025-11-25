@@ -31,7 +31,20 @@ tmoy = []                 # tableau des temps CPU
 allfinstance = fnames     # tableau des noms pour le graphique CPU
 tmoy2 = []                # tableau des temps CPU pour reactive GRASP
 tmoy3 = []                # tableau des temps CPU pour Path Relinking
-tmoy4 = []                # tableau des temps CPU pour ACO
+tmoy4 = []                # tableau des temps CPU pour aco
+aco_param = Dict(
+    "didactic.dat"       => [10, 40, 3, 0.02, 0.10],
+    "pb_100rnd0100.dat"  => [10, 40, 3, 0.02, 0.10],
+    "pb_100rnd0300.dat"  => [12, 50, 4, 0.015, 0.08],
+    "pb_200rnd0100.dat"  => [12, 40, 3, 0.02, 0.10],
+    "pb_200rnd0300.dat"  => [10, 40, 2, 0.03, 0.12],
+    "pb_500rnd0100.dat"  => [15, 30, 3, 0.015, 0.08],
+    "pb_500rnd0400.dat"  => [20, 40, 5, 0.01, 0.05],
+    "pb_1000rnd0100.dat" => [20, 40, 5, 0.01, 0.05],
+    "pb_1000rnd0300.dat" => [10, 25, 2, 0.03, 0.12],
+    "pb_2000rnd0100.dat" => [25, 25, 5, 0.008, 0.04],
+    "pb_2000rnd0500.dat" => [20, 30, 4, 0.012, 0.06]
+)
 
 for i in 1:length(fnames)
     println("Instance: ", fnames[i])
@@ -71,7 +84,8 @@ for i in 1:length(fnames)
     #Solving with ACO
     println("\nSolving with ACO...")
     taco = time()
-    zbetter_aco, zinit_aco, zls_aco, zbest_aco = ACO(A, C)
+    params = aco_param[fnames[i]]
+    zbetter_aco, zinit_aco, zls_aco, zbest_aco = ACO(A, C, params[1], params[2], params[3], params[4], params[5])
     t_elapsed = time() - taco
     push!(tmoy4, t_elapsed)
     plotRunGrasp(fnames[i], zinit_aco, zls_aco, zbest_aco, "aco")
@@ -83,16 +97,7 @@ plotCPUt(allfinstance, tmoy2, "reactivegrasp")
 plotCPUt(allfinstance, tmoy3, "pathrelinking")
 plotCPUt(allfinstance, tmoy4, "aco")
 
-
-
-
-
-
-
 """
-fname="Data/pb_100rnd0300.dat"
-C, A = loadSPP(fname)
-
 # Solving a SPP instance with GLPK
 println("\nSolving...")
 solverSelected = GLPK.Optimizer
@@ -103,6 +108,7 @@ optimize!(spp)
 
 # Displaying the results
 println("z = ", objective_value(spp))
-print("x = "); println(value.(spp[:x]))"""
+print("x = "); println(value.(spp[:x]))
+"""
 
 println("\nThat's all folks !")
