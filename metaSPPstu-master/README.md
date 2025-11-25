@@ -18,18 +18,42 @@ Eléments de soutien à l'implémentation en Julia v1.x des devoirs maison à r�
 
 Le répertoire `Data` contient une sélection d'instances numériques de SPP au format OR-library :
 - didactic.dat
-- pb_100rnd0100.dat 
-- pb_200rnd0100.dat 
+- pb_100rnd0100.dat
+- pb_100rnd300.dat
+- pb_200rnd0100.dat
+- pb_200rnd0300.dat
 - pb_500rnd0100.dat
+- pb_500rnd0400.dat
 - pb_1000rnd0100.dat
+- pb_1000rnd0300.dat
 - pb_2000rnd0100.dat
+- pb_2000rnd0500.dat
+
+------
+
+Dépendances à intaller  :
+- import Pkg; Pkg.add("ArgParse")
+- import Pkg; Pkg.add("PyPlot")
+- import Pkg; Pkg.add("Combinatorics")
+- import Pkg; Pkg.add("GLPK")
+- import Pkg; Pkg.add("JuMP")
 
 ------
 
 Exemple d'utilisation (`main.jl`) avec chemins d'accès correspondant à une configuration standard sur macOS :
-- chargement de l'instance `didactic.dat` de SPP
-- résolution exacte d'une instance de SPP à l'aide du solveur MIP de GLPK
-- collecte des noms d'instances présentes dans le répertoire `Data`
+
+julia main.jl --method grasp --instance didactic.dat --plot
+
+
+main.jl [--method METHOD] [-i INSTANCE] [--plot] [-h]
+
+optional arguments:
+  --method METHOD       Method to run: greedy / grasp / reactive / pr
+                        / aco / all (default: "all")
+  -i, --instance INSTANCE
+                        Filename in ./Data/ (default: "all")
+  --plot                Generate plots
+  -h, --help            show this help message and exit
 
 ------
 
