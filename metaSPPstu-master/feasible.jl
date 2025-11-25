@@ -1,6 +1,6 @@
 export feasible
 
-function feasible(A, mp, kTab, pTab)
+function feasible(A, mp, kTab, pTab, acceptErr = false)
     # Function to check if a solution is feasible
     # Inputs: A : matrix of constraints, mp : matricial product of A and choices, kTab : variables to remove, pTab : variables to add     
     # Output: feasible : boolean indicating if the solution is feasible, the updated mp
@@ -18,9 +18,10 @@ function feasible(A, mp, kTab, pTab)
         end
     end
 
+
     feasible = all(temp .<= 1)
 
-    if feasible
+    if feasible || acceptErr
         mp = temp
     end
 

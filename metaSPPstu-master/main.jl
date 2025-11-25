@@ -29,6 +29,9 @@ println("Filenames found: ", fnames)
 
 tmoy = []                 # tableau des temps CPU
 allfinstance = fnames     # tableau des noms pour le graphique CPU
+tmoy2 = []                # tableau des temps CPU pour reactive GRASP
+tmoy3 = []                # tableau des temps CPU pour Path Relinking
+tmoy4 = []                # tableau des temps CPU pour ACO
 
 for i in 1:length(fnames)
     println("Instance: ", fnames[i])
@@ -40,45 +43,68 @@ for i in 1:length(fnames)
     s2, z2 = SimpleDescent.updateZ(C, A, s1, z1)
     println("SimpleDescent solution : ", z2, ", CpuT : ",time() - tstart)
 
+    # Solving a SPP instance with a simple GRASP
+    println("\nSolving with simple GRASP...")
     tgrasp = time()
-    zinit, zls, zbest, zbetter, s = simpleGrasp(A, C, 0.75, 100)
+    zinit_grasp, zls_grasp, zbest_grasp, zbetter_grasp, s_grasp = simpleGrasp(A, C, 0.75, 100)
     t_elapsed = time() - tgrasp
     push!(tmoy, t_elapsed)
-    println("Best z : ", zbetter, "CPU time = ", round(t_elapsed, digits=4), " s")
-    plotRunGrasp(fnames[i], zinit, zls, zbest)
-   
+    println("Best z : ", zbetter_grasp, ", CPU time = ", round(t_elapsed, digits=4), " s")
+    plotRunGrasp(fnames[i], zinit_grasp, zls_grasp, zbest_grasp, "grasp")
+
+    #Solving a SPP instance with a reactive GRASP
+    treactive = time()
+    println("\nSolving with reactive GRASP...")
+    zbetter_reactive, s_reactive, zAvgK, zWorst, zinit_reactive, zls_reactive, zbest_reactive  = reactiveGrasp(5,200,[0.1,0.25,0.5,0.75,0.9],C,A)
+    t_elapsed = time() - treactive
+    push!(tmoy2, t_elapsed)
+    println("Best z : ", zbetter_reactive, ", Avg Z : ", zAvgK , ", Worst z : ", zWorst , ", CPU time = ", round(t_elapsed, digits=4), " s")
+    plotRunGrasp(fnames[i], zinit_reactive, zls_reactive, zbest_reactive, "reactive")
+
+    tpr = time()
+    println("\nSolving with Path Relinking...")
+    s3 , zbetter_pr = pathRelinking(A, C, s_grasp, zbetter_grasp, s_reactive, zbetter_reactive)
+    t_elapsed = time() - tpr
+    push!(tmoy3, t_elapsed)
+    println("Best z : ", zbetter_pr, ", CPU time = ", round(t_elapsed, digits=4), " s")
 end
 
-plotCPUt(allfinstance, tmoy)
+plotCPUt(allfinstance, tmoy, "grasp")
+plotCPUt(allfinstance, tmoy2, "reactivegrasp")
+plotCPUt(allfinstance, tmoy3, "pathrelinking")
+#plotCPUt(allfinstance, tmoy4, "aco")
+"""
+fname="Data/pb_100rnd0300.dat"
+C, A = loadSPP(fname)
+zinit_grasp, zls_grasp, zbest_grasp, zbetter_grasp, s_grasp = simpleGrasp(A, C, 0.75, 100)
+println("Best z : ", zbetter_grasp)
+zbetter_reactive, s_reactive, zAvgK, zWorst  = reactiveGrasp(5,200,[0.1,0.25,0.5,0.75,0.9],C,A)
+println("Best z : ", zbetter_reactive)
+println(s_reactive)
+s3 , zbetter_pr = pathRelinking(A, C, s_grasp, zbetter_grasp, s_reactive, zbetter_reactive)
+println("Best z : ", zbetter_pr)"""
 
 
 
-# Solving a SPP instance with a reactive GRASP
-#z2, s2 = reactiveGrasp(5,100,[0.1,0.25,0.5,0.75,0.9],C,A)
-
-#println(pathRelinking(A, C, s1, z1, s2, z2))
 
 #Solving with ACO
 #println(ACO(1000, A, C, 50, 50))
 
 
-# Solving a SPP instance with GLPK
-#println("\nSolving...")
-#solverSelected = GLPK.Optimizer
-#spp = setSPP(C, A)
+"""
+fname="Data/pb_100rnd0300.dat"
+C, A = loadSPP(fname)
 
-#set_optimizer(spp, solverSelected)
-#optimize!(spp)
+# Solving a SPP instance with GLPK
+println("\nSolving...")
+solverSelected = GLPK.Optimizer
+spp = setSPP(C, A)
+
+set_optimizer(spp, solverSelected)
+optimize!(spp)
 
 # Displaying the results
-#println("z = ", objective_value(spp))
-#print("x = "); println(value.(spp[:x]))
-
-# =========================================================================== #
-
-# Collecting the names of instances to solve
-println("\nCollecting...")
-target = "Data"
-fnames = getfname(target)
+println("z = ", objective_value(spp))
+print("x = "); println(value.(spp[:x]))"""
 
 println("\nThat's all folks !")

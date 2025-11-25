@@ -1,6 +1,6 @@
 using PyPlot
 
-function plotRunGrasp(iname, zinit, zls, zbest)
+function plotRunGrasp(iname, zinit, zls, zbest, prefix="")
 
     plot_dir = "plots"
     isdir(plot_dir) || mkdir(plot_dir)
@@ -10,8 +10,8 @@ function plotRunGrasp(iname, zinit, zls, zbest)
     zls   = zls[1:last_valid]
     zbest = zbest[1:last_valid]
 
-    figure("run $iname",figsize=(6,6)) # Create a new figure
-    title("GRASP-SPP | \$z_{Init}\$  \$z_{LS}\$  \$z_{Best}\$ | " * iname)
+    figure(string(prefix,"run $iname"),figsize=(6,6)) # Create a new figure
+    title("$prefix-spp | \$z_{Init}\$  \$z_{LS}\$  \$z_{Best}\$ | " * iname)
     xlabel("Itérations")
     ylabel("valeurs de z(x)")
     ylim(0, maximum(zbest)+2)
@@ -25,17 +25,19 @@ function plotRunGrasp(iname, zinit, zls, zbest)
     vlines(x, zinit, zls, linewidth=0.5)
     legend(loc=4, fontsize ="small")
 
-    filename = joinpath(plot_dir, "run_$iname.png")
-    savefig(filename)
-    println("Plot sauvegardé dans $filename")
+    filename = string(prefix, "_run_", iname, ".png")
+
+    filepath = joinpath(plot_dir, filename)
+    savefig(filepath)
+    println("Plot sauvegardé dans $filepath")
 end
 
-function plotCPUt(allfinstance, tmoy)
+function plotCPUt(allfinstance, tmoy, prefix="")
 
     plot_dir = "plots"
     isdir(plot_dir) || mkdir(plot_dir)
 
-    figure("bilan CPUt tous runs",figsize=(6,10)) # Create a new figure
+    figure("bilan CPUt tous runs $prefix",figsize=(6,10)) # Create a new figure
     title("GRASP-SPP | tMoy")
     ylabel("CPUt moyen (s)")
 
@@ -45,7 +47,7 @@ function plotCPUt(allfinstance, tmoy)
     plot(collect(1:length(allfinstance)),tmoy,linestyle="--", lw=0.5, marker="o", ms=4, color="blue", label="tMoy")
     legend(loc=4, fontsize ="small")
 
-    filename = joinpath(plot_dir, "cput_grasp.png")
+    filename = joinpath(plot_dir, "cput_$prefix.png")
     savefig(filename)
     println("Plot sauvegardé dans $filename")
 end

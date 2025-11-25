@@ -7,19 +7,22 @@ function pathRelinking(A, C, s1, z1, s2, z2)
         if s1[i] != s2[i]
             new_s = copy(s1)
             new_s[i] = s2[i]
+            new_z = z1
             if s2[i] == 1
-                z1 += C[i]
+                new_z += C[i]
             else
-                z1 -= C[i]
-            end 
-            if z1 > bestz
-                isFeasible, mp = feasible(A, mp, s1[i]==1 ? [i] : Int[], s2[i]==1 ? [i] : Int[])   
-                if isFeasible
-                    bestz = z1
-                    bests = copy(new_s)
+                new_z -= C[i]
+            end
+            isFeasible, mp = feasible(A, mp, s1[i]==1 ? [i] : Int[], s2[i]==1 ? [i] : Int[], true)   
+            if isFeasible
+                s_desc, z_desc = SimpleDescent.updateZ(C, A, new_s, new_z)
+                if z_desc > bestz
+                    bestz = z_desc
+                    bests = copy(s_desc)
                 end
             end
-            s1 = copy(new_s)
+            z1 = new_z
+            s1[i] = s2[i]
         end
     end 
     if bestz > z2
