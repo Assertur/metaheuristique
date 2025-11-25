@@ -1,112 +1,160 @@
-function generatePopulation(n, C)
+mutable struct Ant
+    value
+    z
+    feasible
+    mp
+end
+
+clamp01(x) = clamp(x, 0.0, 1.0)
+
+function generatePopulation(n, C, A)
     #Create a population of n ant
     pop = []
     for i in 1:n 
-        ant = [zeros(Int16, size(C,1) ),0,true]
+        ant = Ant(zeros(size(C,1)), 0, true, zeros(size(A,1)))
         push!(pop,ant)
     end
     return pop
 end
 
-function feasibleACO(A, C, ant, randC)
-    isAdd = ant[1][randC] == 1
-    if !ant[3] && isAdd 
-        return false
-    elseif ant[3] && !isAdd
-        return true
+
+function managePheromones!(phi, bestSolKnown, bestSolIter, rhoE = 0.1, rhoD = 0.1, iter = 1, maxIter = 100,iterStagnant = 50, lastImprovedIterRef = 0)
+    m = length(phi)
+    for i in 1:m
+        phi[i] = phi[i] * (1.0 - rhoE)
     end
-    active = findall(x -> x == 1, ant[1])
-    for i in 1:size(A,1)
-        cpt = 0
-        for j in active
-            if A[i,j] == 1
-                cpt += 1
-                if cpt > 1
-                    return false
-                end
-            end
+    for i in 1:m
+        if bestSolIter[i] == 1
+            phi[i] += rhoD
         end
     end
-    return true
+    for i in 1:m
+        phi[i] = clamp01(phi[i])
+    end
+
+    if (iter - lastImprovedIterRef[] >= iterStagnant) && any(phi .== 0.0)
+        factor = 0.95 * log10(max(iter,1))/log10(maxIter)
+        for i in 1:m
+            phi[i] *= factor
+        end
+    end
 end
 
 
-function exploration(pheromone, C, pop, A, maxZ)
-    for i in 1:size(pop,1)
-        ant = pop[i]
-        oldZ = ant[2]
-        if oldZ == 0
-            oldZ = 1
+
+function elaborateSolutionGreedyPhi!(phi, sol, A, C)
+    m = length(phi)
+    vConstraint = collect(1:m)
+
+    utility = [sum(A[:,j] .!= 0) for j in 1:m]
+    while !isempty(vConstraint)
+        scores = phi[vConstraint] .* utility[vConstraint]
+        idx = argmax(scores)
+        chosen = vConstraint[idx]
+        ktab = Int[]  
+        ptab = [chosen] 
+        isFeas, newMp = feasible(A, sol.mp, ktab, ptab, true)
+        if isFeas
+            sol.value[chosen] = 1
+            sol.z += C[chosen]
+            sol.feasible = true
+            sol.mp .= newMp 
         end
-        newV = 0
-        isChanged = false
-        randC = 0
-        nbTries = 0
-        while !isChanged && nbTries < 100
-            randC = rand(1:size(C,1))
-            randP = rand()
-            newV = 0
-            if randP <= pheromone[randC]
-                newV = 1
-            end
-            if ant[1][randC] != newV
-                isChanged = true
-            end
-            nbTries += 1
-        end
-        if isChanged
-            ant[1][randC] = newV
-            isFeasible = feasibleACO(A, C, ant, randC)
-            z = 0
-            if isFeasible
-                for i in 1:length(ant[1])
-                    if ant[1][i] == 1
-                        z += C[i]
+        deleteat!(vConstraint, idx)
+    end
+end
+
+
+function elaborateSolutionSelectionMethod!(phi, sol, A, C, iter, maxIter)
+    m = length(phi)
+    vConstraint = collect(1:m)
+
+    utility = [sum(A[:,j] .!= 0) for j in 1:m]
+    P = log10(max(iter,1)) / log10(maxIter)
+    while !isempty(vConstraint)
+        if rand() > P
+            weights = phi[vConstraint] .* utility[vConstraint]
+            if sum(weights) == 0
+                idx = rand(1:length(vConstraint))
+            else
+                r = rand() * sum(weights)
+                acc = 0.0
+                idx = 1
+                for (k,w) in enumerate(weights)
+                    acc += w
+                    if r <= acc
+                        idx = k
+                        break
                     end
                 end
             end
-            ant[2] = z
-            ant[3] = isFeasible
-            p = (ant[2] - oldZ)/oldZ
-            if newV == 1
-                newPheromone = pheromone[randC] + p 
+        else
+            scores = phi[vConstraint] .* utility[vConstraint]
+            idx = argmax(scores)
+        end
+        chosen = vConstraint[idx]
+        ktab = Int[]; ptab = [chosen]
+        isFeas, newMp = feasible(A, sol.mp, ktab, ptab, true)
+        if isFeas
+            sol.value[chosen] = 1
+            sol.z += C[chosen]
+            sol.feasible = true
+            sol.mp .= newMp 
+        end
+        deleteat!(vConstraint, idx)
+    end
+end
+
+
+
+function ACO(A, C, maxAnt = 15, maxIter = 100, iterOnExploit = 3,rhoE = 0.05, rhoD = 0.1, iterStagnant = 20)
+    m = length(C)
+    n = maxAnt
+
+    zbest = []
+    zconstruction = []
+    zamelioration = []
+
+    bestZKnown = 0
+    bestZIter = 0
+    bestSolKnown = zeros(m)
+    bestSolIter = zeros(m)
+    phi = fill(0.5, m)
+
+    pop = generatePopulation(n, m, A)
+
+    lastImprovedIterRef = 0
+    for iter in 1:maxIter
+        bestZIter = 0
+        bestSolIter = zeros(m)
+
+        for antIdx in 1:n
+            sol = Ant(zeros(m), 0.0, true, zeros(eltype(A), size(A,1)))
+            if antIdx <= iterOnExploit
+                elaborateSolutionGreedyPhi!(phi, sol, A, C)
             else
-                newPheromone = pheromone[randC] - p 
+                elaborateSolutionSelectionMethod!(phi, sol, A, C, iter, maxIter)
             end
-            if newPheromone < 0 
-                newPheromone = 0
-            elseif newPheromone > 1
-                newPheromone = 1
+            push!(zconstruction, sol.z)
+
+            sol.value, sol.z = SimpleDescent.runKPExchange(C, A, sol.value, sol.z,1,1,10)
+            push!(zamelioration, sol.z)
+
+            if sol.z > bestZIter
+                bestZIter = sol.z
+                bestSolIter = sol.value
             end
-            pheromone[randC] = newPheromone
-            if ant[2] > maxZ
-                maxZ = ant[2]
+            if sol.z > bestZKnown
+                bestSolKnown = sol.value
+                bestZKnown = sol.z
+                lastImprovedIterRef = iter
             end
+            push!(zbest, bestZKnown)
         end
+
+        managePheromones!(phi, bestSolKnown, bestSolIter, rhoE, rhoD, iter, maxIter,iterStagnant, lastImprovedIterRef)
     end
-    return maxZ
+
+    return bestZKnown, zconstruction, zamelioration, zbest
 end
 
-function dissipation(pheromone)
-    for i in 1:size(pheromone,1)
-        if pheromone[i] > 0.5
-            pheromone[i] = pheromone[i] - 0.01
-        elseif pheromone[i] < 0.5
-            pheromone[i] = pheromone[i] + 0.01
-        end
-    end
-end
-
-function ACO(n, A, C, nbMouv, nbGen)
-    pheromone = [0.5 for i in 1:size(C,1)]
-    maxZ = 0
-    for i in 1:nbGen
-        pop = generatePopulation(n, C)
-        for j in 1:nbMouv
-            maxZ = exploration(pheromone, C, pop, A, maxZ)
-            dissipation(pheromone)
-        end
-        println("maxZ : ", maxZ)
-    end
-    return maxZ
-end

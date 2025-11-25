@@ -67,28 +67,26 @@ for i in 1:length(fnames)
     t_elapsed = time() - tpr
     push!(tmoy3, t_elapsed)
     println("Best z : ", zbetter_pr, ", CPU time = ", round(t_elapsed, digits=4), " s")
+
+    #Solving with ACO
+    println("\nSolving with ACO...")
+    taco = time()
+    zbetter_aco, zinit_aco, zls_aco, zbest_aco = ACO(A, C)
+    t_elapsed = time() - taco
+    push!(tmoy4, t_elapsed)
+    plotRunGrasp(fnames[i], zinit_aco, zls_aco, zbest_aco, "aco")
+    println("Best z : ", zbetter_aco, ", CPU time = ", round(t_elapsed, digits=4), " s")
 end
 
 plotCPUt(allfinstance, tmoy, "grasp")
 plotCPUt(allfinstance, tmoy2, "reactivegrasp")
 plotCPUt(allfinstance, tmoy3, "pathrelinking")
-#plotCPUt(allfinstance, tmoy4, "aco")
-"""
-fname="Data/pb_100rnd0300.dat"
-C, A = loadSPP(fname)
-zinit_grasp, zls_grasp, zbest_grasp, zbetter_grasp, s_grasp = simpleGrasp(A, C, 0.75, 100)
-println("Best z : ", zbetter_grasp)
-zbetter_reactive, s_reactive, zAvgK, zWorst  = reactiveGrasp(5,200,[0.1,0.25,0.5,0.75,0.9],C,A)
-println("Best z : ", zbetter_reactive)
-println(s_reactive)
-s3 , zbetter_pr = pathRelinking(A, C, s_grasp, zbetter_grasp, s_reactive, zbetter_reactive)
-println("Best z : ", zbetter_pr)"""
+plotCPUt(allfinstance, tmoy4, "aco")
 
 
 
 
-#Solving with ACO
-#println(ACO(1000, A, C, 50, 50))
+
 
 
 """

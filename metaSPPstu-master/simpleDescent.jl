@@ -4,7 +4,7 @@ using Combinatorics
 
 include("feasible.jl")
 
-export updateZ
+export updateZ, runKPExchange
 
 function sufisanteX(choices, k, remove)
     # Function to check if there are at least k variables chosen in the solution
