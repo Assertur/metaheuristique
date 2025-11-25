@@ -30,6 +30,7 @@ function plotRunGrasp(iname, zinit, zls, zbest, prefix="")
     filepath = joinpath(plot_dir, filename)
     savefig(filepath)
     println("Plot sauvegardé dans $filepath")
+    plt.close() 
 end
 
 function plotCPUt(allfinstance, tmoy, prefix="")
@@ -50,4 +51,5 @@ function plotCPUt(allfinstance, tmoy, prefix="")
     filename = joinpath(plot_dir, "cput_$prefix.png")
     savefig(filename)
     println("Plot sauvegardé dans $filename")
+    plt.close()
 end
