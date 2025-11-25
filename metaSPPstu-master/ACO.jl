@@ -19,6 +19,17 @@ end
 
 
 function managePheromones!(phi, bestSolKnown, bestSolIter, rhoE = 0.1, rhoD = 0.1, iter = 1, maxIter = 100,iterStagnant = 50, lastImprovedIterRef = 0)
+    # Function to manage pheromone levels
+    # Inputs: phi : vector of pheromone levels
+    #         bestSolKnown : best solution found so far (vector of choices)
+    #         bestSolIter : best solution found in the current iteration (vector of choices)
+    #         rhoE : evaporation rate
+    #         rhoD : deposit rate
+    #         iter : current iteration number
+    #         maxIter : maximum number of iterations
+    #         iterStagnant : number of stagnant iterations before pheromone reset
+    #         lastImprovedIterRef : iteration number of the last improvement
+    
     m = length(phi)
     for i in 1:m
         phi[i] = phi[i] * (1.0 - rhoE)
@@ -43,6 +54,12 @@ end
 
 
 function elaborateSolutionGreedyPhi!(phi, sol, A, C)
+    # Function to elaborate a solution using a greedy heuristic based on pheromone levels
+    # Inputs: phi : vector of pheromone levels
+    #         sol : Ant object to store the solution
+    #         A : matrix of constraints
+    #         C : vector of costs
+
     m = length(phi)
     vConstraint = collect(1:m)
 
@@ -66,6 +83,14 @@ end
 
 
 function elaborateSolutionSelectionMethod!(phi, sol, A, C, iter, maxIter)
+    # Function to elaborate a solution using a selection method based on pheromone levels
+    # Inputs: phi : vector of pheromone levels
+    #         sol : Ant object to store the solution
+    #         A : matrix of constraints
+    #         C : vector of costs
+    #         iter : current iteration number
+    #         maxIter : maximum number of iterations
+
     m = length(phi)
     vConstraint = collect(1:m)
 
@@ -108,6 +133,20 @@ end
 
 
 function ACO(A, C, maxAnt = 10, maxIter = 50, iterOnExploit = 3 ,rhoE = 0.01, rhoD = 0.1, iterStagnant = 5)
+    # Ant Colony Optimization algorithm for SPP
+    # Inputs: A : matrix of constraints
+    #         C : vector of costs
+    #         maxAnt : number of ants
+    #         maxIter : number of iterations
+    #         iterOnExploit : number of iterations on exploitation phase
+    #         rhoE : evaporation rate
+    #         rhoD : deposit rate
+    #         iterStagnant : number of stagnant iterations before pheromone reset
+    # Outputs: bestZKnown : best solution value found
+    #          zconstruction : vector of initial solution values at each iteration
+    #          zamelioration : vector of solution values after simple descent at each iteration
+    #          zbest : vector of best solution values found up to each iteration
+
     m = length(C)
     n = maxAnt
 

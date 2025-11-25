@@ -1,6 +1,12 @@
 using PyPlot
 
 function plotRunGrasp(iname, zinit, zls, zbest, prefix="")
+    # Function to plot the results of a run
+    # Inputs: iname : instance name (string)
+    #         zinit : vector of initial solution values at each iteration
+    #         zls : vector of solution values after simple descent at each iteration
+    #         zbest : vector of best solution values found up to each iteration
+    #         prefix : prefix for the plot title and filename (string)
 
     plot_dir = "plots"
     isdir(plot_dir) || mkdir(plot_dir)
@@ -34,6 +40,10 @@ function plotRunGrasp(iname, zinit, zls, zbest, prefix="")
 end
 
 function plotCPUt(allfinstance, tmoy, prefix="")
+    # Function to plot the average CPU time over all runs
+    # Inputs: allfinstance : list of instance names (vector of strings)
+    #         tmoy : list of average CPU times per instance (vector of floats)
+    #         prefix : prefix for the plot title and filename (string)
 
     plot_dir = "plots"
     isdir(plot_dir) || mkdir(plot_dir)

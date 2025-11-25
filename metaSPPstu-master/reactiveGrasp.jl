@@ -1,4 +1,18 @@
 function reactiveGrasp(itp, itg, listK, C, A)
+    # Reactive GRASP algorithm
+    # Inputs: itp : number of iterations per parameter value
+    #         itg : total number of iterations
+    #         listK : list of alpha parameter values
+    #         C : vector of costs
+    #         A : matrix of constraints
+    # Outputs: zBetter : best solution value found
+    #          cBest : best solution found (vector of choices)
+    #          zAvgK : average solution values per parameter value
+    #          zWorst : worst solution value found
+    #          zconstruction : vector of initial solution values at each iteration
+    #          zamelioration : vector of solution values after simple descent at each iteration
+    #          zbest : vector of best solution values found up to each iteration
+
     zAvgK = zeros(Float64, size(listK,1))
     pK = fill(1/size(listK,1), size(listK,1))
     qk = zeros(Float64, size(listK,1))

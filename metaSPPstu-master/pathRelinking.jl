@@ -1,4 +1,13 @@
 function pathRelinking(A, C, s1, z1, s2, z2)
+    # Function to perform path relinking between two solutions s1 and s2
+    # Inputs: A : matrix of constraints
+    #         C : vector of costs
+    #         s1 : initial solution (vector of choices) 
+    #         z1 : cost of initial solution
+    #         s2 : guiding solution (vector of choices)
+    #         z2 : cost of guiding solution
+    # Outputs: bests : best solution found (vector of choices)
+    #          bestz : cost of best solution found
     mp = A * reshape(s1, :, 1)
     mp = vec(mp)
     bestz = z1
