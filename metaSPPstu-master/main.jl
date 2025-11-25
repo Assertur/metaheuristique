@@ -100,6 +100,20 @@ function run_instance(instance, method="all", plot=true)
             plotRunGrasp(instance, zinit_aco, zls_aco, zbest_aco, "aco")
         end
     end
+
+    if method in ["mip"]
+        println("\nSolving...")
+        solverSelected = GLPK.Optimizer
+        spp = setSPP(C, A)
+
+        set_optimizer(spp, solverSelected)
+        optimize!(spp)
+
+        # Displaying the results
+        println("z = ", objective_value(spp))
+        print("x = "); println(value.(spp[:x]))
+    end
+
 end
 
 # =========================================================================== #
@@ -136,6 +150,7 @@ function main()
             run_instance(f, method, do_plot)
         end
     end
+    println("\nThat's all folks !")
 end
 
 # =========================================================================== #
